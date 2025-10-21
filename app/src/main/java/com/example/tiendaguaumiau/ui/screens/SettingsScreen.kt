@@ -28,7 +28,7 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Pantalla de COnfiguración (Settings)")
+        Text(text = "Pantalla de Configuración (Settings)")
 
         Spacer(modifier = Modifier.height(24.dp))
 

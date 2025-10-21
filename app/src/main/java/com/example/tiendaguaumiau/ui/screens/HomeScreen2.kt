@@ -10,5 +10,6 @@ fun HomeScreen2(){
     val windowSizeClass= obtenerWindowSizeClass()
     when (windowSizeClass.widthSizeClass){
         WindowWidthSizeClass.Compact -> HomeScreenCompacta()
+
     }
 }

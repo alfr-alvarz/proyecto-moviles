@@ -1,4 +1,4 @@
-package com.example.tiendaguauymiau.ui.screens // Asegúrate que el package sea el correcto
+package com.example.tiendaguaumiau.ui.screens
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.tiendaguaumiau.viewmodel.MainViewModel
 
 data class PetData(
     var name: String = "",
@@ -20,7 +22,12 @@ data class PetData(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(
+    navController: NavController,
+    viewModel: MainViewModel
+) {
+
+
     // --- FORMULARIO DE USUARIO ---
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -79,7 +86,7 @@ fun RegisterScreen() {
         }
 
         // --- LISTA  DE MASCOTAS ---
-        // Usamos itemsIndexed para tener el "index" y poder eliminar
+
         itemsIndexed(pets) { index, pet ->
             PetFormItem(
                 petData = pet,
@@ -92,7 +99,7 @@ fun RegisterScreen() {
         item {
             Button(
                 onClick = {
-                    // Simplemente añadimos un nuevo objeto vacío a la lista
+
                     pets.add(PetData())
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -103,11 +110,11 @@ fun RegisterScreen() {
 
         item { Spacer(modifier = Modifier.height(32.dp)) }
 
-        // --- BOTÓN FINAL DE REGISTRO ---
+
         item {
             Button(
                 onClick = {
-                    // AQUÍ IRÁ LA LÓGICA DE VALIDACIÓN Y REGISTRO
+
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -118,7 +125,6 @@ fun RegisterScreen() {
     }
 }
 
-// --- COMPOSABLE
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun UserFormField(
@@ -135,19 +141,16 @@ private fun UserFormField(
             .fillMaxWidth()
             .padding(bottom = 8.dp),
         singleLine = true,
-        // CORRECCIÓN: Se usa VisualTransformation.None en lugar de PasswordVisualTransformation.None
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
     )
 }
-
-// --- COMPOSABLE AUXILIAR PARA EL FORMULARIO DE CADA MASCOTA ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PetFormItem(
     petData: PetData,
     onDelete: () -> Unit
 ) {
-    // Opciones para el Dropdown
+
     val petTypes = listOf("Gato", "Perro", "Ave", "Otro")
     var expanded by remember { mutableStateOf(false) }
 
@@ -161,7 +164,6 @@ private fun PetFormItem(
             .border(1.dp, Color.Gray, MaterialTheme.shapes.small)
             .padding(16.dp)
     ) {
-        // --- CAMPO: NOMBRE DE MASCOTA ---
         OutlinedTextField(
             value = petName,
             onValueChange = {
@@ -202,8 +204,8 @@ private fun PetFormItem(
                         text = { Text(type) },
                         onClick = {
                             petType = type
-                            petData.type = type // Actualizamos el objeto original
-                            expanded = false // Cerramos el menú
+                            petData.type = type
+                            expanded = false
                         }
                     )
                 }
@@ -214,7 +216,7 @@ private fun PetFormItem(
 
 
         Button(
-            onClick = onDelete, // Llama a la función que nos pasaron
+            onClick = onDelete,
             modifier = Modifier.align(Alignment.End),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
         ) {

@@ -19,6 +19,12 @@ import com.example.tiendaguaumiau.navigation.Screen
 import com.example.tiendaguaumiau.ui.screens.HomeScreen
 import com.example.tiendaguaumiau.ui.screens.ProfileScreen
 import com.example.tiendaguaumiau.ui.screens.SettingsScreen
+import com.example.tiendaguaumiau.ui.screens.RegisterScreen
+import com.example.tiendaguaumiau.ui.screens.LoginScreen
+
+
+
+
 import com.example.tiendaguaumiau.view.theme.TiendaGuauMiauTheme
 import com.example.tiendaguaumiau.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -71,6 +77,14 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(route = Screen.Settings.route){
                             SettingsScreen(navController = navController, viewModel = viewModel)
+                        }
+                        composable(route = Screen.Register.route){
+                            RegisterScreen(navController = navController, viewModel = viewModel)
+
+                        }
+                        composable(route = Screen.Login.route){
+                            LoginScreen(navController = navController, viewModel = viewModel)
+
                         }
                     }
                 }

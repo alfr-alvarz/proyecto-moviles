@@ -78,6 +78,11 @@ fun HomeScreen(
                 Button(onClick ={ viewModel.navigateTo(Screen.Settings)}) {
                     Text(text = "Ir a Configuración")
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {viewModel.navigateTo(Screen.Login)}) {
+                    Text("Iniciar Sesión")
+                }
             }
 
         }

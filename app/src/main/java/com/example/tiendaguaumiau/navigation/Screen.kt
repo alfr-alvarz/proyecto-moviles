@@ -8,6 +8,10 @@ sealed class Screen(val route: String) {
 
     data object Settings : Screen("settings_page")
 
+    data object  Login : Screen("login_page")
+
+    data object Register : Screen ("register_page")
+
     //Ejemplo de una ruta a pantalla de detalles que requiere itemId
 
     data class Detail(val itemId:String) : Screen("detail_page/{itemId}"){

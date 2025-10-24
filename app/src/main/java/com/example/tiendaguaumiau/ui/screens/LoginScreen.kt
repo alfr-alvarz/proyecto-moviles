@@ -1,4 +1,4 @@
-package com.example.tiendaguauymiau.ui.screens // Asegúrate que el package sea el correcto
+package com.example.tiendaguaumiau.ui.screens
 
 // Imports necesarios
 import androidx.compose.foundation.layout.*
@@ -8,21 +8,26 @@ import androidx.compose.ui.Alignment // Import correcto
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.tiendaguaumiau.navigation.Screen
+import com.example.tiendaguaumiau.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
-    // 1. CORRECCIÓN: Usamos mutableStateOf para un solo valor de texto
+fun LoginScreen(
+    navController: NavController,
+    viewModel: MainViewModel
+) {
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // 2. CORRECCIÓN: La sintaxis de Column es Column(...) { ...contenido... }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally // 3. CORRECCIÓN: Typo
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
 
@@ -35,12 +40,13 @@ fun LoginScreen() {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Correo") },
+            label = { Text("CORREO" +
+                    "") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
 
-        // 4. CORRECCIÓN: Typo, es Spacer
+
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
@@ -56,16 +62,17 @@ fun LoginScreen() {
 
         Button(
             onClick = {
-                // Lógica de login
+
             },
-            modifier = Modifier.fillMaxWidth() // Añadido para que ocupe todo el ancho
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Iniciar Sesión") // Nota: "Sesión" lleva tilde
+            Text("Iniciar Sesión")
         }
 
         TextButton(
             onClick = {
-                // Lógica para navegar al registro
+                viewModel.navigateTo(Screen.Register)
+
             }
         ) {
             Text("¿No tienes cuenta? Regístrate")

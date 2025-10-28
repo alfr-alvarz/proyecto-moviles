@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
                             SettingsScreen(navController = navController, viewModel = viewModel)
                         }
                         composable(route = Screen.Register.route){
-                            RegisterScreen(navController = navController, viewModel = viewModel)
+                            RegisterScreen(navController = navController)
 
                         }
                         composable(route = Screen.Login.route){

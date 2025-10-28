@@ -4,159 +4,209 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.tiendaguaumiau.viewmodel.MainViewModel
-
-data class PetData(
-    var name: String = "",
-    var type: String = ""
-)
+// Importamos las nuevas clases del archivo del ViewModel
+import com.example.tiendaguaumiau.viewmodel.PetData
+import com.example.tiendaguaumiau.viewmodel.RegistroViewModel
+import com.example.tiendaguaumiau.viewmodel.RegistrationEvent
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    viewModel: MainViewModel
+    vmuser: RegistroViewModel = viewModel()
 ) {
+    val state by vmuser.state.collectAsState()
+    val errors by vmuser.errors.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    // --- FORMULARIO DE USUARIO ---
-    var nombre by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var telefono by remember { mutableStateOf("") }
-
-    // --- ESTADO LISTA DE MASCOTAS ---
-
-    val pets = remember { mutableStateListOf<PetData>() }
-
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // --- REGISTRO DE USUARIO ---
-        item {
-            Text(
-                text = "Registro de usuario",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-        }
-
-        item { UserFormField(label = "NOMBRE COMPLETO", value = nombre, onValueChange = { nombre = it }) }
-        item { UserFormField(label = "CORREO ELECTRÓNICO", value = email, onValueChange = { email = it }) }
-        item {
-            UserFormField(
-                label = "CONTRASEÑA",
-                value = password,
-                onValueChange = { password = it },
-                isPassword = true
-            )
-        }
-        item {
-            UserFormField(
-                label = "CONFIRMAR CONTRASEÑA",
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                isPassword = true
-            )
-        }
-        item { UserFormField(label = "TELÉFONO (opcional)", value = telefono, onValueChange = { telefono = it }) }
-
-        item { Spacer(modifier = Modifier.height(24.dp)) }
-
-        // --- REGISTRO DE MASCOTAS ---
-        item {
-            Text(
-                text = "Registro de mascotas",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-
-        // --- LISTA  DE MASCOTAS ---
-
-        itemsIndexed(pets) { index, pet ->
-            PetFormItem(
-                petData = pet,
-                onDelete = { pets.removeAt(index) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // --- BOTÓN AÑADIR MASCOTAS ---
-        item {
-            Button(
-                onClick = {
-
-                    pets.add(PetData())
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("AÑADIR NUEVO REGISTRO")
+    // --- Efecto para escuchar eventos del ViewModel ---
+    LaunchedEffect(key1 = true) {
+        vmuser.registrationEvent.collectLatest { event ->
+            when (event) {
+                is RegistrationEvent.Success -> {
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
+                    // Opcional: navegar a login
+                    // navController.navigate("login_screen") { popUpTo("register_screen") { inclusive = true } }
+                }
+                is RegistrationEvent.Error -> {
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
+                }
+                is RegistrationEvent.ValidationFailed -> {
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
+                }
             }
         }
+    }
 
-        item { Spacer(modifier = Modifier.height(32.dp)) }
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            // --- REGISTRO DE USUARIO (Sin cambios) ---
+            item {
+                Text(
+                    text = "Registro de usuario",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+            item {
+                OutlinedTextField(
+                    label = { Text("NOMBRE COMPLETO") },
+                    value = state.nombre,
+                    onValueChange = vmuser::onNombreChange,
+                    isError = errors.nombre != null,
+                    supportingText = { if (errors.nombre != null) Text(errors.nombre!!) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
+            item {
+                OutlinedTextField(
+                    label = { Text("CORREO ELECTRONICO") },
+                    value = state.email,
+                    onValueChange = vmuser::onEmailChange,
+                    isError = errors.email != null,
+                    supportingText = { if (errors.email != null) Text(errors.email!!) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
+            item {
+                OutlinedTextField(
+                    label = { Text("CONTRASEÑA") },
+                    value = state.password,
+                    onValueChange = vmuser::onPasswordChange,
+                    isError = errors.password != null,
+                    supportingText = { if (errors.password != null) Text(errors.password!!) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
+            item {
+                OutlinedTextField(
+                    label = { Text("CONFIRMAR CONTRASEÑA") },
+                    value = state.confirmPassword,
+                    onValueChange = vmuser::onConfirmPasswordChange,
+                    isError = errors.confirmPassword != null,
+                    supportingText = { if (errors.confirmPassword != null) Text(errors.confirmPassword!!) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
+            item {
+                OutlinedTextField(
+                    label = { Text("TELÉFONO (opcional)") },
+                    value = state.telefono,
+                    onValueChange = vmuser::onTelefonoChange,
+                    isError = errors.telefono != null,
+                    supportingText = { if (errors.telefono != null) Text(errors.telefono!!) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
 
+            item { Spacer(modifier = Modifier.height(24.dp)) }
 
-        item {
-            Button(
-                onClick = {
+            // --- REGISTRO DE MASCOTAS ---
+            item {
+                Text(
+                    text = "Registro de mascotas",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
 
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text("REGISTRAR", style = MaterialTheme.typography.titleMedium)
+            // --- LISTA DE MASCOTAS ---
+            itemsIndexed(state.pets) { index, pet ->
+                PetFormItem(
+                    petData = pet,
+                    // Conecta los eventos a las funciones del ViewModel
+                    onNameChange = { newName ->
+                        vmuser.onPetNameChange(index, newName)
+                    },
+                    onTypeChange = { newType ->
+                        vmuser.onPetTypeChange(index, newType)
+                    },
+                    onDelete = { vmuser.removePet(index) }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // --- BOTÓN AÑADIR MASCOTAS ---
+            item {
+                Button(
+                    onClick = {
+                        // Llama a la función del ViewModel
+                        vmuser.addPet()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("AÑADIR NUEVO REGISTRO")
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            // --- BOTÓN REGISTRAR ---
+            item {
+                Button(
+                    onClick = {
+                        vmuser.onRegisterClick()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("REGISTRAR", style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun UserFormField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    isPassword: Boolean = false
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        singleLine = true,
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
-    )
-}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PetFormItem(
     petData: PetData,
+    onNameChange: (String) -> Unit,
+    onTypeChange: (String) -> Unit,
     onDelete: () -> Unit
 ) {
 
     val petTypes = listOf("Gato", "Perro", "Ave", "Otro")
     var expanded by remember { mutableStateOf(false) }
-
-
-    var petName by remember { mutableStateOf(petData.name) }
-    var petType by remember { mutableStateOf(petData.type) }
 
     Column(
         modifier = Modifier
@@ -165,24 +215,20 @@ private fun PetFormItem(
             .padding(16.dp)
     ) {
         OutlinedTextField(
-            value = petName,
-            onValueChange = {
-                petName = it
-                petData.name = it
-            },
+            value = petData.name,
+            onValueChange = onNameChange,
             label = { Text("Nombre de la mascota") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
         ) {
             OutlinedTextField(
-                value = petType.ifEmpty { "Seleccione un tipo" },
+                value = petData.type.ifEmpty { "Seleccione un tipo" },
                 onValueChange = {},
                 label = { Text("Tipo de mascota") },
                 readOnly = true,
@@ -193,8 +239,6 @@ private fun PetFormItem(
                     .fillMaxWidth()
                     .menuAnchor()
             )
-
-            // Contenido del Menú
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -203,8 +247,7 @@ private fun PetFormItem(
                     DropdownMenuItem(
                         text = { Text(type) },
                         onClick = {
-                            petType = type
-                            petData.type = type
+                            onTypeChange(type)
                             expanded = false
                         }
                     )
@@ -213,7 +256,6 @@ private fun PetFormItem(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
 
         Button(
             onClick = onDelete,

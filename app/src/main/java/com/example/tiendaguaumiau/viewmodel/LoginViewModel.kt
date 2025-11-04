@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import com.example.tiendaguaumiau.viewmodel.FormState
 
 data class LoginState(
     val email: String = "",
@@ -17,7 +18,7 @@ data class LoginState(
 )
 
 sealed class LoginEvent {
-    data class Success(val message: String) : LoginEvent()
+    data class Success(val user: FormState) : LoginEvent()
     data class Error(val message: String) : LoginEvent()
 }
 
@@ -45,16 +46,16 @@ class LoginViewModel : ViewModel() {
                 return@launch
             }
 
-            // Iniciar Carga
             _state.value = _state.value.copy(isLoading = true)
             delay(3000)
 
+            // Busca al usuario en la base de datos
             val loggedInUser = LocalUserDatabase.login(s.email, s.password)
+
             if (loggedInUser != null) {
-                _loginEvent.emit(LoginEvent.Success("¡Inicio de sesión exitoso!"))
-                resetForm() // Resetea formulario
+                _loginEvent.emit(LoginEvent.Success(loggedInUser))
+                resetForm()
             } else {
-                // Emite error y detiene carga
                 _loginEvent.emit(LoginEvent.Error("Credenciales incorrectas"))
                 _state.value = _state.value.copy(isLoading = false)
             }

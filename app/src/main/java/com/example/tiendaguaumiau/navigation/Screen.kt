@@ -12,6 +12,8 @@ sealed class Screen(val route: String) {
 
     data object Register : Screen ("register_page")
 
+    data object Logued : Screen ("logued_page")
+
     //Ejemplo de una ruta a pantalla de detalles que requiere itemId
 
     data class Detail(val itemId:String) : Screen("detail_page/{itemId}"){

@@ -3,17 +3,14 @@ package com.example.tiendaguaumiau.data
 import com.example.tiendaguaumiau.viewmodel.FormState
 import com.example.tiendaguaumiau.viewmodel.PetData // <-- Añade esta importación
 
-/**
- * Esto es un Singleton (un 'object' de Kotlin) que actuará como
- * nuestra base de datos local falsa, solo vivirá en la memoria.
- */
+/*Base de datos solo de memoria */
 object LocalUserDatabase {
 
     // --- INICIO: USUARIO DE PRUEBA ---
     private val testUser = FormState(
         nombre = "Usuario de Prueba",
         email = "test@duoc.cl",
-        password = "Password123!", // ¡Recuerda esta contraseña!
+        password = "Password123!",
         confirmPassword = "Password123!",
         telefono = "987654321",
         pets = listOf(PetData(name = "Firulais", type = "Perro"))

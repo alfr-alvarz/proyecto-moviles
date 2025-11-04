@@ -39,9 +39,19 @@ fun LoginScreen(
             when (event) {
                 is LoginEvent.Success -> {
                     scope.launch {
-                        snackbarHostState.showSnackbar(event.message)
+                        // Guardamos el usuario en el MainViewModel
+                        viewModel.setLoggedInUser(event.user)
 
-                        viewModel.navigateTo(Screen.Home)
+                        // Mostramos el Snackbar
+                        snackbarHostState.showSnackbar("¡Bienvenido, ${event.user.nombre}!")
+
+                        // MODIFICADO: Navegamos a Home y limpiamos el historial
+                        viewModel.navigateTo(
+                            screen = Screen.Home,
+                            popupToRoute = Screen.Login, // Eliminamos hasta Login...
+                            inclusive = true,          // ...incluyendo Login.
+                            singleTop = true           // Home es 'singleTop'
+                        )
                     }
                 }
                 is LoginEvent.Error -> {

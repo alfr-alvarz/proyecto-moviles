@@ -15,16 +15,16 @@ import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
-    // --- NAVEGACIÓN ---
+    // - NAVEGACIÓN
     private val _navigationEvents= MutableSharedFlow<NavigationEvent>()
     val navigationEvents: SharedFlow<NavigationEvent> = _navigationEvents.asSharedFlow()
 
-    // - ESTADO DE SESIÓN -
+    // - ESTADO DE SESIÓN
     // Guarda el estado del usuario que inició sesión
     private val _currentUser = MutableStateFlow<FormState?>(null)
     val currentUser: StateFlow<FormState?> = _currentUser.asStateFlow()
 
-    // --- Funciones de Navegación -
+    //  Funciones de Navegación
     fun navigateTo(
         screen: Screen,
         popupToRoute: Screen? = null,
@@ -57,7 +57,7 @@ class MainViewModel : ViewModel() {
         _currentUser.value = user
     }
 
-    /*Limpia el usuario del estado y navega de vuelta al Login.*/
+    //Limpia el usuario del estado y navega de vuelta al Login
     fun logout() {
         _currentUser.value = null
 

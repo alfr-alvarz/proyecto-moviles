@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ElevatedCard
@@ -44,16 +43,14 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // --- (NUEVO) ---
     // Observamos el estado del usuario logueado desde el MainViewModel
     val currentUser by viewModel.currentUser.collectAsState()
-    // --- (FIN NUEVO) ---
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                // (MODIFICADO) Mostramos el nombre del usuario si existe
+                //  Mostrar nombre del usuario si existe
                 currentUser?.let { user ->
                     Text(
                         text = "Hola, ${user.nombre}",
@@ -74,7 +71,6 @@ fun HomeScreen(
                     }
                 )
 
-                // (MODIFICADO) Movimos Configuración al menú
                 NavigationDrawerItem(label = { Text(text = "Configuración") },
                     selected = false,
                     onClick = {
@@ -83,7 +79,7 @@ fun HomeScreen(
                     }
                 )
 
-                // --- (NUEVO) Botón de Cerrar Sesión ---
+                //  Botón de Cerrar Sesión
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 NavigationDrawerItem(label = { Text(text = "Cerrar Sesión") },
                     selected = false,
@@ -93,14 +89,12 @@ fun HomeScreen(
                     },
                     icon = { Icon(Icons.Default.Close, contentDescription = "Cerrar Sesión") }
                 )
-                // --- (FIN NUEVO) ---
             }
         }
     ) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    // (MODIFICADO) Título actualizado
                     title = { Text(text = "Mis Mascotas") },
                     navigationIcon = {
                         IconButton(onClick = {
@@ -113,10 +107,8 @@ fun HomeScreen(
             }
         ) { innerPadding ->
 
-            // --- (SECCIÓN REEMPLAZADA) ---
-            // Reemplazamos tu 'Column' estática por la lógica de 'currentUser'
 
-            // Comprobamos si el usuario está cargado
+            // Comprobar si el usuario está cargado
             if (currentUser == null) {
                 // Muestra un indicador de carga si el usuario aún es nulo
                 Box(
@@ -162,14 +154,10 @@ fun HomeScreen(
                     }
                 }
             }
-            // --- (FIN SECCIÓN REEMPLAZADA) ---
         }
     }
 }
 
-// --- (NUEVO) ---
-// Añadimos el Composable privado para la tarjeta de mascota
-// (Este estaba en mi sugerencia anterior)
 @Composable
 private fun PetListItem(pet: PetData) {
     ElevatedCard(
@@ -197,4 +185,3 @@ private fun PetListItem(pet: PetData) {
         }
     }
 }
-// --- (FIN NUEVO) ---

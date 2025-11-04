@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-// --- Se mueve PetData aquí para que el ViewModel lo conozca ---
 data class PetData(
     val name: String = "",
     val type: String = ""
@@ -21,7 +20,7 @@ data class FormState(
     val password: String = "",
     val confirmPassword: String = "",
     val telefono: String = "",
-    // --- La lista de mascotas ahora es parte del estado ---
+
     val pets: List<PetData> = emptyList()
 )
 
@@ -31,10 +30,9 @@ data class FormErrors(
     val password: String? = null,
     val confirmPassword: String? = null,
     val telefono: String? = null
-    // (Opcional) Se podrían añadir errores de mascotas aquí también
 )
 
-// --- Eventos para comunicación de una sola vez (UI) ---
+//Eventos para UI
 sealed class RegistrationEvent {
     data class Success(val message: String) : RegistrationEvent()
     data class Error(val message: String) : RegistrationEvent()
@@ -49,12 +47,12 @@ class RegistroViewModel : ViewModel() {
     private val _errors = MutableStateFlow(FormErrors())
     val errors: StateFlow<FormErrors> = _errors
 
-    // --- Canal para enviar eventos a la UI (Snackbars, Navegación) ---
+    // Canal para enviar eventos a la UI
     private val _registrationEvent = MutableSharedFlow<RegistrationEvent>()
     val registrationEvent = _registrationEvent.asSharedFlow()
 
 
-    // --- Funciones de cambio de estado (Usuario) ---
+    // Funciones de cambio de estado (Usuario)
     fun onNombreChange(v: String) {
         _state.value = _state.value.copy(nombre = v)
         if (_errors.value.nombre != null) validate() // Re-valida al escribir
@@ -80,7 +78,7 @@ class RegistroViewModel : ViewModel() {
         if (_errors.value.telefono != null) validate()
     }
 
-    // --- Funciones de cambio de estado (Mascotas) ---
+    // Funciones de cambio de estado (Mascotas)
     fun addPet() {
         val newPets = _state.value.pets + PetData() // Añade una mascota vacía
         _state.value = _state.value.copy(pets = newPets)
@@ -107,7 +105,7 @@ class RegistroViewModel : ViewModel() {
         _state.value = _state.value.copy(pets = newPets)
     }
 
-    // --- Lógica de Validación y Registro ---
+    // Lógica de Validación y Registro
 
     // validate() actualiza errores y devuelve un booleano
     private fun validate(): Boolean {
@@ -166,7 +164,7 @@ class RegistroViewModel : ViewModel() {
 
                     LocalUserDatabase.register(_state.value)
 
-                    // Si todo sale bien:
+                    // Si funciona todo
                     _registrationEvent.emit(RegistrationEvent.Success("Registro exitoso"))
                     reset()
 
@@ -176,7 +174,7 @@ class RegistroViewModel : ViewModel() {
                 }
             }
         } else {
-            // --- Validación Fallida ---
+            // Validación fallida
             viewModelScope.launch {
                 val petsValid = _state.value.pets.all { it.name.isNotBlank() && it.type.isNotBlank() }
                 val msg = if (!petsValid) "Revisa los datos de tus mascotas" else "Revisa los campos requeridos"

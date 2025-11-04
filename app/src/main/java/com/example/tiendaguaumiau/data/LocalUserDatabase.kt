@@ -1,7 +1,7 @@
 package com.example.tiendaguaumiau.data
 
 import com.example.tiendaguaumiau.viewmodel.FormState
-import com.example.tiendaguaumiau.viewmodel.PetData // <-- Añade esta importación
+import com.example.tiendaguaumiau.viewmodel.PetData
 
 /*Base de datos solo de memoria */
 object LocalUserDatabase {

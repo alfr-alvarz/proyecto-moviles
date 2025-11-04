@@ -45,12 +45,12 @@ fun LoginScreen(
                         // Mostramos el Snackbar
                         snackbarHostState.showSnackbar("¡Bienvenido, ${event.user.nombre}!")
 
-                        // MODIFICADO: Navegamos a Home y limpiamos el historial
+                        // Navegamos a Home y limpiamos el historial
                         viewModel.navigateTo(
                             screen = Screen.Home,
-                            popupToRoute = Screen.Login, // Eliminamos hasta Login...
-                            inclusive = true,          // ...incluyendo Login.
-                            singleTop = true           // Home es 'singleTop'
+                            popupToRoute = Screen.Login,
+                            inclusive = true,
+                            singleTop = true
                         )
                     }
                 }

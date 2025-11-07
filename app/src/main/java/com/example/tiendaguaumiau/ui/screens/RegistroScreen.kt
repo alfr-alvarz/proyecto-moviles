@@ -34,14 +34,12 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // --- Efecto para escuchar eventos del ViewModel ---
+    // Efecto para eventos del ViewModel
     LaunchedEffect(key1 = true) {
         vmuser.registrationEvent.collectLatest { event ->
             when (event) {
                 is RegistrationEvent.Success -> {
                     scope.launch { snackbarHostState.showSnackbar(event.message) }
-                    // Opcional: navegar a login
-                    // navController.navigate("login_screen") { popUpTo("register_screen") { inclusive = true } }
                 }
                 is RegistrationEvent.Error -> {
                     scope.launch { snackbarHostState.showSnackbar(event.message) }
@@ -64,7 +62,7 @@ fun RegisterScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // --- REGISTRO DE USUARIO (Sin cambios) ---
+            //REGISTRO DE USUARIO
             item {
                 Text(
                     text = "Registro de usuario",
@@ -139,7 +137,7 @@ fun RegisterScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            // --- REGISTRO DE MASCOTAS ---
+            // REGISTRO DE MASCOTAS
             item {
                 Text(
                     text = "Registro de mascotas",
@@ -148,7 +146,7 @@ fun RegisterScreen(
                 )
             }
 
-            // --- LISTA DE MASCOTAS ---
+            // LISTA DE MASCOTAS
             itemsIndexed(state.pets) { index, pet ->
                 PetFormItem(
                     petData = pet,
@@ -164,11 +162,10 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // --- BOTÓN AÑADIR MASCOTAS ---
+            // BOTÓN AÑADIR MASCOTAS
             item {
                 Button(
                     onClick = {
-                        // Llama a la función del ViewModel
                         vmuser.addPet()
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -179,7 +176,7 @@ fun RegisterScreen(
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
-            // --- BOTÓN REGISTRAR ---
+            // BOTÓN REGISTRAR
             item {
                 Button(
                     onClick = {

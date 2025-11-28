@@ -33,7 +33,7 @@ fun AppNavigation(
             SettingsScreen(navController = navController, viewModel = viewModel)
         }
         composable(route = Screen.Register.route) {
-            RegisterScreen(navController = navController)
+            RegisterScreen(viewModel = viewModel)
         }
         composable(route = Screen.Login.route) {
             LoginScreen(navController = navController, viewModel = viewModel)

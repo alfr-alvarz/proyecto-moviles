@@ -1,152 +1,134 @@
 package com.example.tiendaguaumiau.ui.screens
 
-
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.tiendaguaumiau.navigation.Screen
-import com.example.tiendaguaumiau.viewmodel.LoginEvent
-import com.example.tiendaguaumiau.viewmodel.LoginViewModel
+import coil.compose.AsyncImage
 import com.example.tiendaguaumiau.viewmodel.MainViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: MainViewModel,
-    vmLogin: LoginViewModel = viewModel()
+    viewModel: MainViewModel
 ) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-    val state by vmLogin.state.collectAsState()
+    val error by viewModel.errorState.collectAsState()
+    val backgroundImageUri by viewModel.backgroundImageUri.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(key1 = true) {
-        vmLogin.loginEvent.collectLatest { event ->
-            when (event) {
-                is LoginEvent.Success -> {
-                    scope.launch {
-                        // Guardamos el usuario en el MainViewModel
-                        viewModel.setLoggedInUser(event.user)
-
-                        // Mostramos el Snackbar
-                        snackbarHostState.showSnackbar("¡Bienvenido, ${event.user.nombre}!")
-
-                        // Navegamos a Home y limpiamos el historial
-                        viewModel.navigateTo(
-                            screen = Screen.Home,
-                            popupToRoute = Screen.Login,
-                            inclusive = true,
-                            singleTop = true
-                        )
-                    }
-                }
-                is LoginEvent.Error -> {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(event.message)
-                    }
-                }
-            }
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearError()
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+    val hasBackgroundImage = backgroundImageUri != null
+    val contentColor = if (hasBackgroundImage) Color.White else Color.Unspecified
+    val scaffoldColor = if (hasBackgroundImage) Color.Transparent else MaterialTheme.colorScheme.background
+    val scrimModifier = if (hasBackgroundImage) Modifier.background(Color.Black.copy(alpha = 0.3f)) else Modifier
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (hasBackgroundImage) {
+            AsyncImage(
+                model = backgroundImageUri,
+                contentDescription = "Fondo de pantalla",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = scaffoldColor
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .then(scrimModifier),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Text(
                     text = "GUAU&MIAU",
                     style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.padding(bottom = 32.dp)
+                    modifier = Modifier.padding(bottom = 32.dp),
+                    color = contentColor
                 )
 
                 OutlinedTextField(
-                    value = state.email,
-                    onValueChange = vmLogin::onEmailChange,
+                    value = email,
+                    onValueChange = { email = it },
                     label = { Text("CORREO") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    enabled = !state.isLoading
+                    singleLine = true
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = state.password,
-                    onValueChange = vmLogin::onPasswordChange,
+                    value = password,
+                    onValueChange = { password = it },
                     label = { Text("CONTRASEÑA") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    enabled = !state.isLoading // Deshabilitar campo si está cargando
+                    visualTransformation = PasswordVisualTransformation()
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = {
-                        vmLogin.onLoginClick()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !state.isLoading
+                    onClick = { viewModel.login(email, password) },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Iniciar Sesión")
                 }
 
+                TextButton(onClick = { viewModel.navigateToRegister() }) {
+                    Text("¿No tienes cuenta? Regístrate", color = contentColor)
+                }
+
                 TextButton(
-                    onClick = {
-                        viewModel.navigateTo(Screen.Register)
-                    },
-                    enabled = !state.isLoading
+                    onClick = { viewModel.loginComoInvitado() },
+                    modifier = Modifier.padding(top = 8.dp)
                 ) {
-                    Text("¿No tienes cuenta? Regístrate")
+                    Text("Entrar como Invitado (Demo)", color = contentColor)
                 }
             }
-
-            //  Overlay de Carga
-            AnimatedVisibility(
-                visible = state.isLoading,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)) // Fondo semitransparente
-                ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
-
         }
     }
 }

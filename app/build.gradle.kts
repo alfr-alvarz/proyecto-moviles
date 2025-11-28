@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    // KSP 1.9.23-1.0.19 es correcto para Kotlin 1.9.23
+    id("com.google.devtools.ksp") version "1.9.23-1.0.19"
 }
 
 android {
@@ -29,6 +31,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -36,10 +39,12 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
     composeOptions {
+        // 1.5.11 es la versión correcta para Kotlin 1.9.23
         kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
@@ -51,34 +56,60 @@ android {
 
 dependencies {
 
-    // Paso 1: Usar un BOM de Compose compatible con el SDK 34.
-    // 2024.04.00 es una buena opción estable que no requiere SDK 35.
+    // --- Versiones ---
+    val room_version = "2.6.1"
+    val retrofit_version = "2.9.0"
+    val moshi_version = "1.15.1"
+    val datastore_version = "1.0.0"
+
+    // --- Almacenamiento Local (DataStore) ---
+    implementation("androidx.datastore:datastore-preferences:$datastore_version")
+
+    // --- Base de Datos (Room) ---
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+
+    // --- Networking (Retrofit & Moshi) ---
+    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
+    // Converter para usar Moshi con Retrofit
+    implementation("com.squareup.retrofit2:converter-moshi:$retrofit_version")
+    // Librería principal de Moshi
+    implementation("com.squareup.moshi:moshi-kotlin:$moshi_version")
+    // Generador de código de Moshi (usando KSP)
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshi_version")
+
+    // --- Compose (BOM 2024.04.00) ---
     implementation(platform("androidx.compose:compose-bom:2024.04.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.00"))
 
-    // Dependencias de Android KTX (versiones compatibles)
+    // --- Android KTX ---
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose") // La versión la gestiona el BOM
+    implementation("androidx.activity:activity-compose")
 
-    // Dependencias de Compose (el BOM gestiona las versiones)
+    // --- UI Compose ---
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    // Esta dependencia ya está incluida correctamente por el BOM y no necesita el sufijo "-android".
     implementation("androidx.compose.material3:material3-window-size-class")
+    implementation("io.coil-kt:coil-compose:2.5.0") // Para AsyncImage
 
-    // Dependencias de Navigation y Lifecycle para Compose (versiones compatibles)
+    // --- Navegación y Lifecycle ---
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose") // Versión del BOM
-    implementation("androidx.lifecycle:lifecycle-runtime-compose") // Versión del BOM
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
-    // Coroutines
+    // --- Coroutines ---
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
-    // Dependencias de Test
+    // --- Tests ---
     testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.10")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0") // Para LiveData y ViewModels
+
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")

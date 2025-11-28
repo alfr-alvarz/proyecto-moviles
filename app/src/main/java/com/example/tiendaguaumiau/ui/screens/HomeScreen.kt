@@ -21,39 +21,35 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.tiendaguaumiau.data.Mascota
 import com.example.tiendaguaumiau.navigation.Screen
 import com.example.tiendaguaumiau.viewmodel.MainViewModel
-import com.example.tiendaguaumiau.viewmodel.PetData
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Observamos el estado del usuario logueado desde el MainViewModel
-    val currentUser by viewModel.currentUser.collectAsState()
+    val loggedInUser by viewModel.loggedInUser.collectAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                //  Mostrar nombre del usuario si existe
-                currentUser?.let { user ->
+                loggedInUser?.let { data ->
                     Text(
-                        text = "Hola, ${user.nombre}",
+                        text = "Hola, ${data.usuario.nombre}",
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -67,7 +63,7 @@ fun HomeScreen(
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        viewModel.navigateTo(Screen.Profile)
+                        viewModel.navigateToScreen(Screen.Profile)
                     }
                 )
 
@@ -75,17 +71,16 @@ fun HomeScreen(
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        viewModel.navigateTo(Screen.Settings)
+                        viewModel.navigateToScreen(Screen.Settings)
                     }
                 )
 
-                //  Botón de Cerrar Sesión
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 NavigationDrawerItem(label = { Text(text = "Cerrar Sesión") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        viewModel.logout() // Llama a la función de logout
+                        viewModel.logout()
                     },
                     icon = { Icon(Icons.Default.Close, contentDescription = "Cerrar Sesión") }
                 )
@@ -97,20 +92,16 @@ fun HomeScreen(
                 TopAppBar(
                     title = { Text(text = "Mis Mascotas") },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(imageVector = Icons.Default.Menu, contentDescription = "Menú")
                         }
                     }
                 )
             }
         ) { innerPadding ->
+            val currentUser = loggedInUser
 
-
-            // Comprobar si el usuario está cargado
             if (currentUser == null) {
-                // Muestra un indicador de carga si el usuario aún es nulo
                 Box(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     contentAlignment = Alignment.Center
@@ -119,18 +110,13 @@ fun HomeScreen(
                     Text("Cargando usuario...")
                 }
             } else {
-                // El usuario está cargado, mostramos sus mascotas
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding) // Usamos el innerPadding
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // Padding extra
+                    modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Saludo
                     item {
                         Text(
-                            "¡Hola, ${currentUser!!.nombre}!", // !! es seguro por el check
+                            "¡Hola, ${currentUser.usuario.nombre}!",
                             style = MaterialTheme.typography.headlineMedium
                         )
                         Spacer(Modifier.height(8.dp))
@@ -141,14 +127,12 @@ fun HomeScreen(
                         Spacer(Modifier.height(16.dp))
                     }
 
-                    // Lista de Mascotas
-                    if (currentUser!!.pets.isEmpty()) {
+                    if (currentUser.mascotas.isEmpty()) {
                         item {
                             Text("Aún no tienes mascotas registradas.")
                         }
                     } else {
-                        items(currentUser!!.pets) { pet ->
-                            // Usamos el PetListItem de la sugerencia anterior
+                        items(currentUser.mascotas) { pet ->
                             PetListItem(pet = pet)
                         }
                     }
@@ -159,25 +143,23 @@ fun HomeScreen(
 }
 
 @Composable
-private fun PetListItem(pet: PetData) {
+private fun PetListItem(pet: Mascota) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 20.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
                 Text(
-                    pet.name,
+                    pet.nombre,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    pet.type,
+                    pet.tipo,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

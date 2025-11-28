@@ -9,3 +9,4 @@ Nombre del grupo: Grupo Sintaxis
 Integrantes: Valentina Cortez, Alfredo Álvarez
 Trello: https://trello.com/invite/b/68dc02d1a7583afc3f606ed8/ATTIeab8300ec27e93b96d20c37bd269b97665DE90A5/proyecto-moviles
 
+API Rest Springboot utilizada: https://github.com/alfr-alvarz/apimoviles-mascotas

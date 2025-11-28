@@ -49,11 +49,25 @@ class MainViewModel(private val repository: UsuarioRepository) : ViewModel() {
         viewModelScope.launch {
             val result = repository.login(correo, contrasena)
             result.onSuccess {
-                _loggedInUser.value = it // El repositorio ahora nos da el usuario directamente.
+                _loggedInUser.value = it
                 _errorState.value = null
                 navigateTo(Screen.Home, popupToRoute = Screen.Login, inclusive = true)
             }.onFailure {
                 _errorState.value = it.message
+            }
+        }
+    }
+
+    // Nueva función para el login de demostración
+    fun loginComoInvitado() {
+        viewModelScope.launch {
+            val result = repository.loginComoInvitado()
+            result.onSuccess {
+                _loggedInUser.value = it
+                _errorState.value = null
+                navigateTo(Screen.Home, popupToRoute = Screen.Login, inclusive = true)
+            }.onFailure {
+                _errorState.value = "No se pudo encontrar el usuario de ejemplo. Asegúrate de que la app tenga conexión la primera vez que se ejecuta."
             }
         }
     }

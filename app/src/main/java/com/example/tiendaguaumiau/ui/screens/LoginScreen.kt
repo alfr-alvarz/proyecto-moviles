@@ -98,11 +98,18 @@ fun LoginScreen(
 
             TextButton(
                 onClick = {
-                    // FIX: Call the public navigation function
                     viewModel.navigateToRegister()
                 }
             ) {
                 Text("¿No tienes cuenta? Regístrate")
+            }
+            
+            // Botón para el login de invitado
+            TextButton(
+                onClick = { viewModel.loginComoInvitado() },
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Entrar como Invitado (Demo)")
             }
         }
     }

@@ -27,7 +27,7 @@ class UsuarioRepository(private val apiService: ApiService, private val db: AppD
             val usuarios = usuariosDto.map { Usuario(id = it.id.toInt(), nombre = it.nombreCompleto, correo = it.correo, contrasena = "", telefono = it.telefono) }
             val mascotas = mascotasDto.map { Mascota(id = it.id.toInt(), nombre = it.nombre, tipo = it.tipo, idUsuario = it.usuario.id.toInt()) }
 
-            withContext(Dispatchers.IO) { db.clearAllTables() }
+            usuarioDao.limpiarParaSincronizacion()
             
             usuarioDao.insertarVarios(usuarios)
             mascotaDao.insertarVarias(mascotas)
@@ -39,15 +39,12 @@ class UsuarioRepository(private val apiService: ApiService, private val db: AppD
         }
     }
 
-    // FIX: La función ahora devuelve el objeto UsuarioConMascotas completo.
     suspend fun login(correo: String, contrasena: String): Result<UsuarioConMascotas> {
         return try {
             val response = apiService.login(LoginRequestDto(correo, contrasena))
             if (response.isSuccessful && response.body() != null) {
-                // Primero, sincroniza todos los datos de la red a la BD local.
                 actualizarDatosLocales().getOrThrow()
                 
-                // Después de la sincronización, busca al usuario en la BD local.
                 val userId = response.body()!!.id.toInt()
                 val usuarioCompleto = usuarioDao.getUsuarioConMascotas(userId)
                 
@@ -59,6 +56,39 @@ class UsuarioRepository(private val apiService: ApiService, private val db: AppD
             } else {
                 Result.failure(Exception("Correo o contraseña incorrectos"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    // FIX: Lógica "Crear al Pulsar" para el modo demo.
+    suspend fun loginComoInvitado(): Result<UsuarioConMascotas> {
+        return try {
+            var usuarioEjemplo = usuarioDao.getUsuarioConMascotasPorCorreo("ejemplo@duoc.cl")
+            
+            if (usuarioEjemplo == null) {
+                // Si no existe, lo crea.
+                val nuevoUsuario = Usuario(
+                    nombre = "Usuario de Ejemplo",
+                    correo = "ejemplo@duoc.cl",
+                    contrasena = "", // No se necesita para demo
+                    telefono = "12345678"
+                )
+                val idUsuario = usuarioDao.insertar(nuevoUsuario)
+
+                val nuevaMascota = Mascota(
+                    nombre = "Fido",
+                    tipo = "Perro",
+                    idUsuario = idUsuario.toInt()
+                )
+                mascotaDao.insertarVarias(listOf(nuevaMascota))
+                
+                // Lo busca de nuevo para asegurarse de que está completo.
+                usuarioEjemplo = usuarioDao.getUsuarioConMascotasPorCorreo("ejemplo@duoc.cl")!!
+            }
+            
+            Result.success(usuarioEjemplo)
+
         } catch (e: Exception) {
             Result.failure(e)
         }

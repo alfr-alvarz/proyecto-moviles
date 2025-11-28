@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    // esta versión usa Kotlin en 1.9.21
+    id("com.google.devtools.ksp") version "1.9.23-1.0.19"
 }
 
 android {
@@ -29,6 +31,8 @@ android {
             )
         }
     }
+
+    // Configuración de Java 11 intacta
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -36,10 +40,12 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
     composeOptions {
+        // 1.5.6 es la versión exacta compatible con Kotlin 1.9.21
         kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
@@ -51,33 +57,37 @@ android {
 
 dependencies {
 
-    // Paso 1: Usar un BOM de Compose compatible con el SDK 34.
-    // 2024.04.00 es una buena opción estable que no requiere SDK 35.
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+
+    // BOM de Compose (2024.04.00 es estable)
     implementation(platform("androidx.compose:compose-bom:2024.04.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.00"))
 
-    // Dependencias de Android KTX (versiones compatibles)
+    // Dependencias Android KTX
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose") // La versión la gestiona el BOM
+    implementation("androidx.activity:activity-compose")
 
-    // Dependencias de Compose (el BOM gestiona las versiones)
+    // Dependencias Compose (sin versiones, el BOM manda)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    // Esta dependencia ya está incluida correctamente por el BOM y no necesita el sufijo "-android".
     implementation("androidx.compose.material3:material3-window-size-class")
 
-    // Dependencias de Navigation y Lifecycle para Compose (versiones compatibles)
+    // Navigation y Lifecycle
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose") // Versión del BOM
-    implementation("androidx.lifecycle:lifecycle-runtime-compose") // Versión del BOM
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
-    // Dependencias de Test
+    // Tests
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

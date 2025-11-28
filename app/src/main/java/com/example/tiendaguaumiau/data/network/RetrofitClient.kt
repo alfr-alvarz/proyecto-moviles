@@ -7,7 +7,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 object RetrofitClient {
 
-    // URL base para el emulador de Android conectado a un localhost
+    // URL base para el emulador de Android conectado a localhost
     private const val BASE_URL = "http://10.0.2.2:8080/"
 
     private val moshi = Moshi.Builder()

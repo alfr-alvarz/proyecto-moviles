@@ -1,12 +1,6 @@
 package com.example.tiendaguaumiau.data
 
-import android.net.Uri
-
 /**
- * Clase de datos para la UI, ahora con un campo para la URI de la imagen.
+ * Clase de datos para transferir la información de una mascota desde la UI al ViewModel.
  */
-data class MascotaData(
-    val nombre: String = "",
-    val tipo: String = "",
-    val imagenUri: Uri? = null
-)
+data class MascotaData(val nombre: String, val tipo: String)

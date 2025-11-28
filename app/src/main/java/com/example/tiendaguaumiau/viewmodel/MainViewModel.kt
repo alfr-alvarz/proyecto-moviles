@@ -37,7 +37,6 @@ class MainViewModel(
     private val _loggedInUser = MutableStateFlow<UsuarioConMascotas?>(null)
     val loggedInUser: StateFlow<UsuarioConMascotas?> = _loggedInUser.asStateFlow()
 
-    // Flow para el fondo de pantalla que lee desde DataStore.
     val backgroundImageUri: StateFlow<String?> = preferencesRepository.backgroundImageUri
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 

@@ -24,5 +24,5 @@ data class Mascota(
     val nombre: String,
     val tipo: String,
     @ColumnInfo(name = "id_usuario")
-    val idUsuario: Int // Clave foránea que apunta al Usuario
+    val idUsuario: Int
 )

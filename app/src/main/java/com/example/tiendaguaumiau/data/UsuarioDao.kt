@@ -37,7 +37,6 @@ interface UsuarioDao {
     @Query("DELETE FROM usuarios WHERE correo != 'ejemplo@duoc.cl'")
     suspend fun borrarTodosExceptoDemo()
 
-    // FIX: Use the correct SQL column name 'id_usuario'
     @Query("DELETE FROM mascotas WHERE id_usuario NOT IN (SELECT id FROM usuarios WHERE correo = 'ejemplo@duoc.cl')")
     suspend fun borrarMascotasDeNoDemos()
 

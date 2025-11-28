@@ -8,9 +8,7 @@ import com.example.tiendaguaumiau.data.network.ApiService
 import com.example.tiendaguaumiau.data.network.LoginRequestDto
 import com.example.tiendaguaumiau.data.network.MascotaRegistroDto
 import com.example.tiendaguaumiau.data.network.RegistroRequestDto
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 class UsuarioRepository(private val apiService: ApiService, private val db: AppDatabase) {
 
@@ -61,17 +59,15 @@ class UsuarioRepository(private val apiService: ApiService, private val db: AppD
         }
     }
     
-    // FIX: Lógica "Crear al Pulsar" para el modo demo.
     suspend fun loginComoInvitado(): Result<UsuarioConMascotas> {
         return try {
             var usuarioEjemplo = usuarioDao.getUsuarioConMascotasPorCorreo("ejemplo@duoc.cl")
             
             if (usuarioEjemplo == null) {
-                // Si no existe, lo crea.
                 val nuevoUsuario = Usuario(
                     nombre = "Usuario de Ejemplo",
                     correo = "ejemplo@duoc.cl",
-                    contrasena = "", // No se necesita para demo
+                    contrasena = "",
                     telefono = "12345678"
                 )
                 val idUsuario = usuarioDao.insertar(nuevoUsuario)
@@ -83,7 +79,6 @@ class UsuarioRepository(private val apiService: ApiService, private val db: AppD
                 )
                 mascotaDao.insertarVarias(listOf(nuevaMascota))
                 
-                // Lo busca de nuevo para asegurarse de que está completo.
                 usuarioEjemplo = usuarioDao.getUsuarioConMascotasPorCorreo("ejemplo@duoc.cl")!!
             }
             

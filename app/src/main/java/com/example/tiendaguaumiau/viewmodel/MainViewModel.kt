@@ -1,10 +1,12 @@
 package com.example.tiendaguaumiau.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tiendaguaumiau.data.MascotaData
 import com.example.tiendaguaumiau.data.UsuarioConMascotas
 import com.example.tiendaguaumiau.data.network.MascotaRegistroDto
+import com.example.tiendaguaumiau.data.repository.PreferencesRepository
 import com.example.tiendaguaumiau.data.repository.UsuarioRepository
 import com.example.tiendaguaumiau.navigation.NavigationEvent
 import com.example.tiendaguaumiau.navigation.Screen
@@ -18,19 +20,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val repository: UsuarioRepository) : ViewModel() {
+class MainViewModel(
+    private val usuarioRepository: UsuarioRepository,
+    private val preferencesRepository: PreferencesRepository
+) : ViewModel() {
 
     private val _navigationEvents = MutableSharedFlow<NavigationEvent>()
     val navigationEvents: SharedFlow<NavigationEvent> = _navigationEvents.asSharedFlow()
 
-    val usuariosConMascotas: StateFlow<List<UsuarioConMascotas>> = repository.usuariosConMascotas
+    val usuariosConMascotas: StateFlow<List<UsuarioConMascotas>> = usuarioRepository.usuariosConMascotas
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _errorState = MutableStateFlow<String?>(null)
     val errorState: StateFlow<String?> = _errorState.asStateFlow()
-    
+
     private val _loggedInUser = MutableStateFlow<UsuarioConMascotas?>(null)
     val loggedInUser: StateFlow<UsuarioConMascotas?> = _loggedInUser.asStateFlow()
+
+    // Flow para el fondo de pantalla que lee desde DataStore.
+    val backgroundImageUri: StateFlow<String?> = preferencesRepository.backgroundImageUri
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
         sincronizarDatos()
@@ -38,8 +47,7 @@ class MainViewModel(private val repository: UsuarioRepository) : ViewModel() {
 
     fun sincronizarDatos() {
         viewModelScope.launch {
-            val result = repository.actualizarDatosLocales()
-            result.onFailure {
+            usuarioRepository.actualizarDatosLocales().onFailure {
                 _errorState.value = "Error de sincronización: ${it.message}"
             }
         }
@@ -47,7 +55,7 @@ class MainViewModel(private val repository: UsuarioRepository) : ViewModel() {
 
     fun login(correo: String, contrasena: String) {
         viewModelScope.launch {
-            val result = repository.login(correo, contrasena)
+            val result = usuarioRepository.login(correo, contrasena)
             result.onSuccess {
                 _loggedInUser.value = it
                 _errorState.value = null
@@ -58,16 +66,15 @@ class MainViewModel(private val repository: UsuarioRepository) : ViewModel() {
         }
     }
 
-    // Nueva función para el login de demostración
     fun loginComoInvitado() {
         viewModelScope.launch {
-            val result = repository.loginComoInvitado()
+            val result = usuarioRepository.loginComoInvitado()
             result.onSuccess {
                 _loggedInUser.value = it
                 _errorState.value = null
                 navigateTo(Screen.Home, popupToRoute = Screen.Login, inclusive = true)
             }.onFailure {
-                _errorState.value = "No se pudo encontrar el usuario de ejemplo. Asegúrate de que la app tenga conexión la primera vez que se ejecuta."
+                _errorState.value = "No se pudo encontrar el usuario de ejemplo."
             }
         }
     }
@@ -75,7 +82,7 @@ class MainViewModel(private val repository: UsuarioRepository) : ViewModel() {
     fun register(nombre: String, correo: String, contrasena: String, telefono: String, mascotas: List<MascotaData>) {
         viewModelScope.launch {
             val mascotasDto = mascotas.map { MascotaRegistroDto(it.nombre, it.tipo) }
-            val result = repository.registrar(nombre, correo, contrasena, telefono, mascotasDto)
+            val result = usuarioRepository.registrar(nombre, correo, contrasena, telefono, mascotasDto)
             result.onSuccess {
                 _errorState.value = "Registro exitoso. Por favor, inicie sesión."
                 navigateTo(Screen.Login, popupToRoute = Screen.Register, inclusive = true)
@@ -88,6 +95,12 @@ class MainViewModel(private val repository: UsuarioRepository) : ViewModel() {
     fun logout() {
         _loggedInUser.value = null
         navigateTo(Screen.Login, popupToRoute = Screen.Home, inclusive = true, singleTop = true)
+    }
+
+    fun saveBackgroundImage(uri: Uri) {
+        viewModelScope.launch {
+            preferencesRepository.saveBackgroundImageUri(uri.toString())
+        }
     }
 
     fun navigateToRegister() {

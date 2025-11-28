@@ -60,6 +60,10 @@ dependencies {
     val room_version = "2.6.1"
     val retrofit_version = "2.9.0"
     val moshi_version = "1.15.1"
+    val datastore_version = "1.0.0"
+
+    // --- Almacenamiento Local (DataStore) ---
+    implementation("androidx.datastore:datastore-preferences:$datastore_version")
 
     // --- Base de Datos (Room) ---
     implementation("androidx.room:room-runtime:$room_version")
@@ -90,6 +94,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material3:material3-window-size-class")
+    implementation("io.coil-kt:coil-compose:2.5.0") // Para AsyncImage
 
     // --- Navegación y Lifecycle ---
     implementation("androidx.navigation:navigation-compose:2.7.7")

@@ -1,6 +1,8 @@
 package com.example.tiendaguaumiau.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,21 +27,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.tiendaguaumiau.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    navController: NavController, // Kept for other potential navigations
+    navController: NavController,
     viewModel: MainViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val error by viewModel.errorState.collectAsState()
+    val backgroundImageUri by viewModel.backgroundImageUri.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(error) {
@@ -49,67 +55,79 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "GUAU&MIAU",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = 32.dp)
+    val hasBackgroundImage = backgroundImageUri != null
+    val contentColor = if (hasBackgroundImage) Color.White else Color.Unspecified
+    val scaffoldColor = if (hasBackgroundImage) Color.Transparent else MaterialTheme.colorScheme.background
+    val scrimModifier = if (hasBackgroundImage) Modifier.background(Color.Black.copy(alpha = 0.3f)) else Modifier
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (hasBackgroundImage) {
+            AsyncImage(
+                model = backgroundImageUri,
+                contentDescription = "Fondo de pantalla",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
+        }
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("CORREO") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("CONTRASEÑA") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation()
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Button(
-                onClick = {
-                    viewModel.login(email, password)
-                },
-                modifier = Modifier.fillMaxWidth()
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = scaffoldColor
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .then(scrimModifier),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Iniciar Sesión")
-            }
+                Text(
+                    text = "GUAU&MIAU",
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.padding(bottom = 32.dp),
+                    color = contentColor
+                )
 
-            TextButton(
-                onClick = {
-                    viewModel.navigateToRegister()
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("CORREO") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("CONTRASEÑA") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = { viewModel.login(email, password) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Iniciar Sesión")
                 }
-            ) {
-                Text("¿No tienes cuenta? Regístrate")
-            }
-            
-            // Botón para el login de invitado
-            TextButton(
-                onClick = { viewModel.loginComoInvitado() },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text("Entrar como Invitado (Demo)")
+
+                TextButton(onClick = { viewModel.navigateToRegister() }) {
+                    Text("¿No tienes cuenta? Regístrate", color = contentColor)
+                }
+
+                TextButton(
+                    onClick = { viewModel.loginComoInvitado() },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Entrar como Invitado (Demo)", color = contentColor)
+                }
             }
         }
     }

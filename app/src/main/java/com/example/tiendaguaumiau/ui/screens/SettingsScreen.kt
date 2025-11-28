@@ -34,7 +34,7 @@ fun SettingsScreen(
 
         Button(
             onClick = {
-                viewModel.navigateTo(Screen.Home)
+                viewModel.navigateToScreen(Screen.Home)
             }
         ) {
             Text("Volver al Inicio")
@@ -44,7 +44,7 @@ fun SettingsScreen(
 
         Button(
             onClick = {
-                viewModel.navigateTo(Screen.Profile)
+                viewModel.navigateToScreen(Screen.Profile)
             }
         ) {
             Text("Ir a Perfil")

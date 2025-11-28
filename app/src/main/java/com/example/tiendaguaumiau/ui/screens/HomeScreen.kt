@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.tiendaguaumiau.data.Mascota
 import com.example.tiendaguaumiau.navigation.Screen
@@ -37,18 +36,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val currentUserWithPets by viewModel.currentUser.collectAsState()
+    val loggedInUser by viewModel.loggedInUser.collectAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                currentUserWithPets?.let { data ->
+                loggedInUser?.let { data ->
                     Text(
                         text = "Hola, ${data.usuario.nombre}",
                         style = MaterialTheme.typography.titleLarge,
@@ -64,7 +63,7 @@ fun HomeScreen(
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        viewModel.navigateTo(Screen.Profile)
+                        viewModel.navigateToScreen(Screen.Profile)
                     }
                 )
 
@@ -72,7 +71,7 @@ fun HomeScreen(
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        viewModel.navigateTo(Screen.Settings)
+                        viewModel.navigateToScreen(Screen.Settings)
                     }
                 )
 
@@ -100,7 +99,7 @@ fun HomeScreen(
                 )
             }
         ) { innerPadding ->
-            val currentUser = currentUserWithPets
+            val currentUser = loggedInUser
 
             if (currentUser == null) {
                 Box(

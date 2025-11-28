@@ -28,13 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.tiendaguaumiau.navigation.Screen
 import com.example.tiendaguaumiau.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    navController: NavController, // Mantenido para la navegación a Registro
+    navController: NavController, // Kept for other potential navigations
     viewModel: MainViewModel
 ) {
     var email by remember { mutableStateOf("") }
@@ -43,11 +42,10 @@ fun LoginScreen(
     val error by viewModel.errorState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Efecto para mostrar el Snackbar cuando hay un error
     LaunchedEffect(error) {
         error?.let {
             snackbarHostState.showSnackbar(it)
-            viewModel.clearError() // Limpiar el error después de mostrarlo
+            viewModel.clearError()
         }
     }
 
@@ -100,8 +98,8 @@ fun LoginScreen(
 
             TextButton(
                 onClick = {
-                    // Navegamos usando el NavController o el ViewModel
-                    viewModel.navigateTo(Screen.Register)
+                    // FIX: Call the public navigation function
+                    viewModel.navigateToRegister()
                 }
             ) {
                 Text("¿No tienes cuenta? Regístrate")

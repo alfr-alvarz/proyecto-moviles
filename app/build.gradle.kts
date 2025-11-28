@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // esta versión usa Kotlin en 1.9.21
+    // KSP 1.9.23-1.0.19 es correcto para Kotlin 1.9.23
     id("com.google.devtools.ksp") version "1.9.23-1.0.19"
 }
 
@@ -32,7 +32,6 @@ android {
         }
     }
 
-    // Configuración de Java 11 intacta
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -45,7 +44,7 @@ android {
         compose = true
     }
     composeOptions {
-        // 1.5.6 es la versión exacta compatible con Kotlin 1.9.21
+        // 1.5.11 es la versión correcta para Kotlin 1.9.23
         kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
@@ -57,37 +56,50 @@ android {
 
 dependencies {
 
+    // --- Versiones ---
     val room_version = "2.6.1"
+    val retrofit_version = "2.9.0"
+    val moshi_version = "1.15.1"
 
+    // --- Base de Datos (Room) ---
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
 
-    // BOM de Compose (2024.04.00 es estable)
+    // --- Networking (Retrofit & Moshi) ---
+    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
+    // Converter para usar Moshi con Retrofit
+    implementation("com.squareup.retrofit2:converter-moshi:$retrofit_version")
+    // Librería principal de Moshi
+    implementation("com.squareup.moshi:moshi-kotlin:$moshi_version")
+    // Generador de código de Moshi (usando KSP)
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshi_version")
+
+    // --- Compose (BOM 2024.04.00) ---
     implementation(platform("androidx.compose:compose-bom:2024.04.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.00"))
 
-    // Dependencias Android KTX
+    // --- Android KTX ---
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose")
 
-    // Dependencias Compose (sin versiones, el BOM manda)
+    // --- UI Compose ---
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material3:material3-window-size-class")
 
-    // Navigation y Lifecycle
+    // --- Navegación y Lifecycle ---
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
-    // Coroutines
+    // --- Coroutines ---
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
-    // Tests
+    // --- Tests ---
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
